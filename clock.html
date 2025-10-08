@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>clock</title>
+    <style>
+        body {
+            font-family: 'Maple Mono NF CN', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle, #001f3f, #000);
+            color: #0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .clock {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            border: 8px solid #0f0;
+            border-radius: 50%;
+            box-shadow: 0 0 30px #0f0, inset 0 0 15px #0a0;
+            background: radial-gradient(circle, #002b36, #000);
+        }
+
+        .hand {
+            position: absolute;
+            width: 50%;
+            height: 2px;
+            background: #0f0;
+            top: 50%;
+            left: 50%;
+            transform-origin: 0% 50%;
+            transform: rotate(90deg);
+            transition: transform 0.1s linear;
+        }
+
+        .hour {
+            height: 6px;
+            width: 30%;
+            background: #0f0;
+        }
+
+        .minute {
+            height: 4px;
+            width: 40%;
+            background: #0f0;
+        }
+
+        .second {
+            height: 2px;
+            width: 45%;
+            background: red;
+        }
+
+        .center {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #0f0;
+            border: 2px solid red;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px red;
+        }
+
+        .number {
+            position: absolute;
+            font-size: 18px;
+            color: #0f0;
+            transform: translate(-50%, -50%);
+            text-shadow: 0 0 5px #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="clock" id="clock">
+        <div class="hand hour" id="hour"></div>
+        <div class="hand minute" id="minute"></div>
+        <div class="hand second" id="second"></div>
+        <div class="center"></div>
+        <!-- Numbers will be dynamically added here -->
+    </div>
+    <script>
+        // Dynamically position numbers
+        const clock = document.getElementById('clock');
+        const radius = 160; // Adjusted radius to center numbers correctly
+
+        for (let i = 1; i <= 12; i++) {
+            const angle = (i - 3) * (Math.PI / 6); // Adjust angle to start at 12 o'clock
+            const x = radius + (radius - 30) * Math.cos(angle); // Subtract padding for numbers
+            const y = radius + (radius - 30) * Math.sin(angle); // Subtract padding for numbers
+
+            const number = document.createElement('div');
+            number.className = 'number';
+            number.style.left = `${x}px`;
+            number.style.top = `${y}px`;
+            number.textContent = i;
+            clock.appendChild(number);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours() % 12;
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+
+            const hourDeg = (hours + minutes / 60) * 30; // 360 / 12 = 30
+            const minuteDeg = (minutes + seconds / 60) * 6; // 360 / 60 = 6
+            const secondDeg = seconds * 6; // 360 / 60 = 6
+
+            document.getElementById('hour').style.transform = `rotate(${hourDeg}deg)`;
+            document.getElementById('minute').style.transform = `rotate(${minuteDeg}deg)`;
+            document.getElementById('second').style.transform = `rotate(${secondDeg}deg)`;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>

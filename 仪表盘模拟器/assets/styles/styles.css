@@ -1,0 +1,80 @@
+.dashboard {
+    max-width: 100%; /* 确保仪表盘宽度适应屏幕 */
+    margin: 0 auto;
+    padding: 5px; /* 减少内边距 */
+    background-color: #1e1e2f; /* 深色背景 */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    color: #fff; /* 白色文字 */
+    box-sizing: border-box; /* 包括内边距在宽度计算中 */
+}
+
+.dashboard-title {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    color: #ffcc00; /* 仿真仪表的黄色标题 */
+}
+
+.instrument-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* 减少行间距 */
+}
+
+.instrument-row {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px; /* 减少列间距 */
+}
+
+.instrument-item {
+    background-color: #2a2a3b; /* 深灰色背景 */
+    padding: 5px; /* 减少内边距 */
+    border-radius: 10px; /* 更圆润的边角 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4); /* 更深的阴影 */
+    text-align: center;
+    width: 100%;
+    flex: 1; /* 普通仪表自适应宽度 */
+    max-width: 150px; /* 缩小普通仪表宽度 */
+    color: #fff; /* 白色文字 */
+}
+
+.instrument-item.large {
+    flex: 1; /* 大仪表占据更多空间 */
+    max-width: 200px; /* 缩小大仪表宽度 */
+}
+
+.instrument-label {
+    display: block;
+    font-size: 1em; /* 缩小标签字体 */
+    margin-bottom: 5px;
+    color: #ffcc00; /* 仿真仪表的黄色标签 */
+}
+
+.instrument-value {
+    font-size: 2em; /* 缩小数值字体 */
+    font-weight: bold;
+    color: #00ff00; /* 仿真仪表的绿色数值 */
+}
+
+.instrument-unit {
+    display: block;
+    font-size: 0.8em; /* 缩小单位字体 */
+    color: #bbb; /* 更柔和的灰色 */
+}
+
+.instrument-canvas {
+    width: 100%;
+    height: auto; /* 保持宽高比 */
+    background-color: #000; /* 黑色背景模拟仪表 */
+    border-radius: 50%; /* 圆形仪表 */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.instrument-detail {
+    font-size: 0.8em; /* 缩小细节字体 */
+    color: #aaa; /* 更柔和的灰色 */
+    margin-top: 3px;
+    text-align: center;
+}

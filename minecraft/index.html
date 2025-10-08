@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINECRAFT 启动器 & MOD 推荐</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "等线", sans-serif;
+        }
+ 
+        body {
+            background-color: #dbffdd;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+ 
+        /* 加载动画样式 */
+        #loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            font-family: "Minecrafter", sans-serif;
+        }
+ 
+        #loader h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+ 
+        /* 主要内容样式 */
+        .content {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+        }
+ 
+        /* 标题样式 */
+        h1 {
+            font-family: "Minecrafter", sans-serif;
+            color: #333;
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+ 
+        /* 次级标题样式 */
+        h2 {
+            color: #444;
+            font-size: 24px;
+            margin: 20px 0;
+        }
+ 
+        /* 按钮样式 */
+        .btn {
+            background-color: #00d14d;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 15px 0;
+            display: inline-block;
+        }
+ 
+        .btn:hover {
+            background-color: #00b340;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+ 
+        /* 链接样式 */
+        .link {
+            color: #444;
+            text-decoration: none;
+            font-size: 20px;
+            margin: 15px 0;
+        }
+ 
+        .link:hover {
+            text-decoration: underline;
+            color: #333;
+        }
+ 
+        /* 启动器与 MOD 区域样式 */
+        .launcher-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+ 
+        .mod-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body onload="document.getElementById('loader').style.display='none'"> 
+    <!-- 加载动画 -->
+    <div id="loader">
+        <h1>加载中...</h1>
+    </div>
+ 
+    <!-- 主要内容 -->
+    <div class="content">
+        <h1>HI, MINECRAFT!</h1>
+ 
+        <!-- 启动器区域 -->
+        <div class="launcher-section">
+            <h2>- 启动器 -</h2>
+            <a href="https://hmcl.huangyuhui.net"  class="link" target="_blank">
+                HMCL 启动器官网 
+            </a>
+        </div>
+ 
+        <!-- MOD 区域 -->
+        <div class="mod-section">
+            <h2>- MOD -</h2>
+            <a href="https://modrinth.com"  class="link" target="_blank">
+                MOD 下载网站 
+            </a>
+        </div>
+ 
+        <!-- 按钮区域 -->
+        <div style="margin-top: 20px;">
+            <button class="btn" onclick="window.location='https://zhang-sheng-hong.github.io/minecraft/mod/';"> 
+                [ MOD 推荐 ]
+            </button>
+            
+            <button class="btn" onclick="window.location='https://zhang-sheng-hong.github.io/xinghai/';">
+                [ 关于 ]
+            </button>
+        </div>
+    </div>
+</body>
+</html>

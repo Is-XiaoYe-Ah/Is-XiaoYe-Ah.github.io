@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINECRAFT MOD 推荐站</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "等线", sans-serif;
+        }
+ 
+        body {
+            background-color: #ccf7ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+ 
+        /* 加载动画样式 */
+        #loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            font-family: "Minecrafter Alt", sans-serif;
+        }
+ 
+        #loader h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+ 
+        /* 主要内容样式 */
+        .content {
+            width: 80%;
+            max-width: 600px;
+        }
+ 
+        .greeting {
+            font-family: "Minecrafter Alt", sans-serif;
+            color: #333;
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+ 
+        /* 搜索框样式 */
+        #searchInput {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #91efff;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+        }
+ 
+        #searchInput:focus {
+            border-color: #7ec8ff;
+            box-shadow: 0 0 10px rgba(148, 200, 255, 0.3);
+        }
+ 
+        /* MOD 列表样式 */
+        .mod-list {
+            list-style-type: none;
+            margin-bottom: 30px;
+        }
+ 
+        .mod-item {
+            font-size: 20px;
+            color: #444;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+ 
+        .mod-item:hover {
+            transform: translateX(10px);
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .mod-name {
+            font-weight: bold;
+            color: #3498db;
+        }
+ 
+        /* 按钮样式 */
+        .btn {
+            background-color: #91efff;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-family: "Minecrafter Alt", sans-serif;
+        }
+ 
+        .btn:hover {
+            background-color: #7ec8ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body onload="document.getElementById('loader').style.display='none'"> 
+    <!-- 加载动画 -->
+    <div id="loader">
+        <h1>加载中...</h1>
+    </div>
+ 
+    <!-- 主要内容 -->
+    <div class="content">
+        <div class="greeting">
+            HI, MINECRAFT!
+        </div>
+ 
+        <!-- 搜索框 -->
+        <input type="text" id="searchInput" placeholder="搜索 MOD..." onkeyup="searchMods()">
+ 
+        <h1>MOD 推荐</h1>
+ 
+        <ul class="mod-list" id="modList">
+            <!-- MOD 数据将在此处动态插入 -->
+        </ul>
+ 
+        <!-- 返回主页按钮 -->
+        <button class="btn" onclick="window.location='https://zhang-sheng-hong.github.io/minecraft/'"> 
+            [ 主页 ]
+        </button>
+    </div>
+ 
+    <script>
+        // MOD 数据库 
+        const mods = [
+            { name: "Physics - 物理增强", description: "提供真实的物理引擎体验" },
+            { name: "OptiFine - 性能优化", description: "显著提高游戏性能和画质" },
+            { name: "Forge - MOD 加载器", description: "Minecraft MOD 的基础加载器" },
+            { name: "JEI - 物品百科全书", description: "查看所有物品和配方的终极工具" },
+            { name: "Charm - 简化操作", description: "提供多种便捷的功能增强" },
+            { name: "Quark - 功能增强", description: "添加各种实用的小功能" },
+            { name: "Better Builder's Wands - 建造工具", description: "增强建造工具的功能" },
+            { name: "TConstruct - 工艺制作", description: "扩展锻造和工艺系统" },
+            { name: "Botania - 魔法植物", description: "引入魔法植物和自然元素" },
+            { name: "Immersive Engineering - 工业技术", description: "增加工业机械和自动化系统" }
+        ];
+ 
+        // 初始化页面时显示所有 MOD 
+        function init() {
+            displayMods(mods);
+        }
+ 
+        // 搜索功能 
+        function searchMods() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase(); 
+            const filteredMods = mods.filter(mod  => 
+                mod.name.toLowerCase().includes(searchTerm)  ||
+                mod.description.toLowerCase().includes(searchTerm) 
+            );
+            
+            displayMods(filteredMods);
+        }
+ 
+        // 显示 MOD 列表 
+        function displayMods(modList) {
+            const modListElement = document.getElementById('modList'); 
+            modListElement.innerHTML  = '';
+ 
+            modList.forEach(mod  => {
+                const li = document.createElement('li'); 
+                li.className  = 'mod-item';
+                li.innerHTML  = `
+                    <span class="mod-name">${mod.name}</span><br> 
+                    ${mod.description} 
+                `;
+                modListElement.appendChild(li); 
+            });
+ 
+            // 如果没有搜索结果，显示提示信息 
+            if (modList.length  === 0) {
+                const li = document.createElement('li'); 
+                li.className  = 'mod-item';
+                li.style.color  = '#666';
+                li.style.textAlign  = 'center';
+                li.innerHTML  = '没有找到相关 MOD...';
+                modListElement.appendChild(li); 
+            }
+        }
+ 
+        // 页面加载完成后初始化 
+        init();
+    </script>
+</body>
+</html>

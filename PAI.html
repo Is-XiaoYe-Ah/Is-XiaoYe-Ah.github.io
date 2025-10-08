@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科学计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Arial", sans-serif;
+        }
+ 
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+ 
+        .calculator {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: 340px;
+        }
+ 
+        .display-container {
+            margin-bottom: 15px;
+        }
+ 
+        .formula-input {
+            width: 100%;
+            height: 40px;
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+ 
+        .display {
+            width: 100%;
+            height: 60px;
+            margin-bottom: 15px;
+            text-align: right;
+            padding: 15px;
+            font-size: 24px;
+            border: none;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            box-sizing: border-box;
+            resize: none;
+        }
+ 
+        .history {
+            width: 100%;
+            height: 60px;
+            margin-bottom: 15px;
+            text-align: right;
+            padding: 15px;
+            font-size: 14px;
+            color: #666;
+            border: none;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            box-sizing: border-box;
+            resize: none;
+            overflow-y: auto;
+        }
+ 
+        .button-row {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+ 
+        .button {
+            width: calc((100% - 30px) / 4);
+            height: 60px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+ 
+        .button:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+        }
+ 
+        .operator {
+            background-color: #ff9800;
+            color: white;
+        }
+ 
+        .operator:hover {
+            background-color: #fa8f00;
+        }
+ 
+        .clear {
+            background-color: #ff5722;
+            color: white;
+        }
+ 
+        .clear:hover {
+            background-color: #fa4f00;
+        }
+ 
+        .equals {
+            background-color: #4da1ff;
+            color: white;
+        }
+ 
+        .equals:hover {
+            background-color: #3f86ff;
+        }
+ 
+        .special-operator {
+            background-color: #7ec8ee;
+            color: white;
+        }
+ 
+        .special-operator:hover {
+            background-color: #6ab3e6;
+        }
+ 
+        @media (max-width: 480px) {
+            .calculator {
+                width: 90%;
+                padding: 15px;
+            }
+ 
+            .button {
+                width: calc((100% - 20px) / 4);
+                height: 55px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display-container">
+            <input type="text" class="formula-input" id="formula" placeholder="输入公式" onkeypress="handleKeyPress(event)">
+            <input type="text" class="display" id="display" readonly>
+        </div>
+        <input type="text" class="history" id="history" readonly>
+        <div class="button-row">
+            <button class="button clear" onclick="clearDisplay()">C</button>
+            <button class="button special-operator" onclick="appendOperator('(')">(</button>
+            <button class="button special-operator" onclick="appendOperator(')')">)</button>
+            <button class="button operator" onclick="appendOperator('/')">÷</button>
+        </div>
+        <div class="button-row">
+            <button class="button" onclick="appendNumber(7)">7</button>
+            <button class="button" onclick="appendNumber(8)">8</button>
+            <button class="button" onclick="appendNumber(9)">9</button>
+            <button class="button operator" onclick="appendOperator('*')">×</button>
+        </div>
+        <div class="button-row">
+            <button class="button" onclick="appendNumber(4)">4</button>
+            <button class="button" onclick="appendNumber(5)">5</button>
+            <button class="button" onclick="appendNumber(6)">6</button>
+            <button class="button operator" onclick="appendOperator('-')">-</button>
+        </div>
+        <div class="button-row">
+            <button class="button" onclick="appendNumber(1)">1</button>
+            <button class="button" onclick="appendNumber(2)">2</button>
+            <button class="button" onclick="appendNumber(3)">3</button>
+            <button class="button operator" onclick="appendOperator('+')">+</button>
+        </div>
+        <div class="button-row">
+            <button class="button"=" onclickappendNumber(0)" style="width: calc((100% - 30px) / 2 + 15px);">0</button>
+            <button class="button special-operator" onclick="appendDecimal('.')">.</button>
+            <button class="button equals" onclick="calculate()" style="width: calc((100% - 30px) / 4);">=</button>
+        </div>
+    </div>
+ 
+    <script>
+        let currentExpression = '';
+        let history = '';
+        const operators = ['+', '-', '*', '/', '(', ')'];
+        
+        function handleKeyPress(event) {
+            const key = event.key; 
+            
+            if (key >= '0' && key <= '9' || key === '.') {
+                appendNumber(key);
+                event.preventDefault(); 
+            } else if (operators.includes(key))  {
+                appendOperator(key);
+                event.preventDefault(); 
+            } else if (key === 'Enter') {
+                calculate();
+                event.preventDefault(); 
+            } else if (key === 'Backspace') {
+                currentExpression = currentExpression.slice(0,  -1);
+                updateDisplay();
+                event.preventDefault(); 
+            }
+        }
+ 
+        function appendNumber(num) {
+            if (num === '.' && currentExpression.includes('.'))  return;
+            currentExpression += num;
+            updateDisplay();
+        }
+ 
+        function appendOperator(operator) {
+            // 检查当前表达式的最后一个字符是否是右括号 
+            if (currentExpression.endsWith(')'))  {
+                currentExpression += operator;
+            } else if (operators.includes(currentExpression.slice(-1)))  {
+                currentExpression = currentExpression.slice(0,  -1) + operator;
+            } else {
+                currentExpression += operator;
+            }
+            updateDisplay();
+        }
+ 
+        function appendDecimal() {
+            appendNumber('.');
+        }
+ 
+        function clearDisplay() {
+            currentExpression = '';
+            history = '';
+            updateDisplay();
+        }
+ 
+        function calculate() {
+            try {
+                const result = eval(currentExpression);
+                history = `${history}${currentExpression} = ${result}\n`;
+                currentExpression = result.toString(); 
+                updateDisplay();
+                saveHistory();
+            } catch (error) {
+                alert('计算错误，请检查表达式是否正确');
+                clearDisplay();
+            }
+        }
+ 
+        function updateDisplay() {
+            document.getElementById('display').value  = currentExpression;
+            document.getElementById('history').value  = history;
+        }
+ 
+        function saveHistory() {
+            localStorage.setItem('calcHistory',  history);
+        }
+ 
+        window.onload  = function() {
+            const savedHistory = localStorage.getItem('calcHistory'); 
+            if (savedHistory) {
+                history = savedHistory + '\n';
+                updateDisplay();
+            }
+        };
+    </script>
+</body>
+</html>

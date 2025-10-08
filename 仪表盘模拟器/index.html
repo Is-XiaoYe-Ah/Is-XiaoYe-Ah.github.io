@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A320 飞行仪表盘模拟器</title>
+    <link rel="stylesheet" href="assets/styles/styles.css">
+</head>
+<body>
+    <header>
+        <h1>A320 飞行仪表盘模拟器</h1>
+        <p>模拟空客 A320 的飞行仪表，实时显示飞行数据。</p>
+    </header>
+    <main>
+        <div id="dashboard-container" class="dashboard">
+            <p class="dashboard-title">当前仪表样式：空客 A320</p>
+            <div class="instrument-panel">
+                <div class="instrument-row">
+                    <div class="instrument-item large">
+                        <label class="instrument-label">姿态指示器</label>
+                        <canvas id="attitude-indicator" class="instrument-canvas"></canvas>
+                        <p class="instrument-detail">显示飞机的俯仰角和滚转角。</p>
+                    </div>
+                    <div class="instrument-item large">
+                        <label class="instrument-label">航向指示器</label>
+                        <canvas id="heading-indicator" class="instrument-canvas"></canvas>
+                        <p class="instrument-detail">显示飞机的当前航向角度。</p>
+                    </div>
+                </div>
+                <div class="instrument-row">
+                    <div class="instrument-item">
+                        <label class="instrument-label">速度</label>
+                        <span id="speed-display" class="instrument-value">250</span>
+                        <span class="instrument-unit">节</span>
+                        <p class="instrument-detail">当前飞行速度。</p>
+                    </div>
+                    <div class="instrument-item">
+                        <label class="instrument-label">高度</label>
+                        <span id="altitude-display" class="instrument-value">35000</span>
+                        <span class="instrument-unit">英尺</span>
+                        <p class="instrument-detail">当前飞行高度。</p>
+                    </div>
+                    <div class="instrument-item">
+                        <label class="instrument-label">垂直速度</label>
+                        <span id="vspeed-display" class="instrument-value">0</span>
+                        <span class="instrument-unit">英尺/分钟</span>
+                        <p class="instrument-detail">显示爬升或下降的速度。</p>
+                    </div>
+                    <div class="instrument-item">
+                        <label class="instrument-label">燃油量</label>
+                        <span id="fuel-display" class="instrument-value">5000</span>
+                        <span class="instrument-unit">公斤</span>
+                        <p class="instrument-detail">剩余燃油量。</p>
+                    </div>
+                </div>
+                <div class="instrument-row">
+                    <div class="instrument-item">
+                        <label class="instrument-label">发动机 1 转速</label>
+                        <span id="engine1-rpm-display" class="instrument-value">85</span>
+                        <span class="instrument-unit">%</span>
+                        <p class="instrument-detail">显示发动机 1 的转速百分比。</p>
+                    </div>
+                    <div class="instrument-item">
+                        <label class="instrument-label">发动机 2 转速</label>
+                        <span id="engine2-rpm-display" class="instrument-value">85</span>
+                        <span class="instrument-unit">%</span>
+                        <p class="instrument-detail">显示发动机 2 的转速百分比。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="assets/scripts/core/core-calculation.js"></script>
+    <script src="assets/scripts/core/core-render.js"></script>
+    <script src="assets/scripts/core/rules.js"></script>
+    <script src="assets/scripts/physics/physics.js"></script>
+    <script src="assets/scripts/main/scripts.js"></script>
+</body>
+</html>
