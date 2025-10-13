@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D粒子正方体</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: grab;
+        }
+        
+        body:active {
+            cursor: grabbing;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            color: white;
+        }
+        
+        h1 {
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        p {
+            color: #ccc;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 14px;
+            z-index: 100;
+        }
+        
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>欢迎来到小野的网站</h1>
+        <p>我很高兴您来到这里！</p>
+    </div>
+    
+    <div class="controls">
+        拖动鼠标旋转视角 | 滚轮缩放
+    </div>
+
+    <script>
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        document.body.appendChild(canvas);
+
+        // 设置canvas大小
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // 3D粒子正方体配置
+        const cubeSize = 150; // 正方体大小
+        const particles = [];
+        const particleCount = 8; // 8个顶点
+
+        // 创建正方体的8个顶点
+        for (let x = -1; x <= 1; x += 2) {
+            for (let y = -1; y <= 1; y += 2) {
+                for (let z = -1; z <= 1; z += 2) {
+                    particles.push({
+                        x: x * cubeSize,
+                        y: y * cubeSize,
+                        z: z * cubeSize,
+                        originalX: x * cubeSize,
+                        originalY: y * cubeSize,
+                        originalZ: z * cubeSize
+                    });
+                }
+            }
+        }
+
+        // 正方体的边（连接哪些点）
+        const edges = [
+            [0,1], [1,3], [3,2], [2,0], // 底面
+            [4,5], [5,7], [7,6], [6,4], // 顶面
+            [0,4], [1,5], [2,6], [3,7]  // 侧面
+        ];
+
+        // 相机和旋转控制
+        let mouseX = 0;
+        let mouseY = 0;
+        let isMouseDown = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let rotationX = 0;
+        let rotationY = 0;
+        let scale = 1;
+
+        // 鼠标事件
+        canvas.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isMouseDown) return;
+            
+            const deltaX = e.clientX - lastMouseX;
+            const deltaY = e.clientY - lastMouseY;
+            
+            rotationY += deltaX * 0.01;
+            rotationX += deltaY * 0.01;
+            
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isMouseDown = false;
+        });
+
+        // 滚轮缩放
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            scale += e.deltaY * -0.001;
+            scale = Math.max(0.5, Math.min(2, scale)); // 限制缩放范围
+        });
+
+        // 3D投影函数
+        function project(x, y, z) {
+            const fov = 500;
+            const scale = fov / (fov + z);
+            return {
+                x: x * scale + canvas.width / 2,
+                y: y * scale + canvas.height / 2,
+                scale: scale
+            };
+        }
+
+        // 旋转函数
+        function rotateX(x, y, z, angle) {
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            return {
+                y: y * cos - z * sin,
+                z: z * cos + y * sin,
+                x: x
+            };
+        }
+
+        function rotateY(x, y, z, angle) {
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            return {
+                x: x * cos - z * sin,
+                z: z * cos + x * sin,
+                y: y
+            };
+        }
+
+        function rotateZ(x, y, z, angle) {
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            return {
+                x: x * cos - y * sin,
+                y: y * cos + x * sin,
+                z: z
+            };
+        }
+
+        // 动画循环
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 自动旋转（如果没有鼠标拖动）
+            if (!isMouseDown) {
+                rotationY += 0.005;
+                rotationX += 0.002;
+            }
+            
+            // 绘制边
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 2;
+            
+            edges.forEach(edge => {
+                const p1 = particles[edge[0]];
+                const p2 = particles[edge[1]];
+                
+                // 应用旋转
+                let rotated1 = rotateX(p1.originalX, p1.originalY, p1.originalZ, rotationX);
+                rotated1 = rotateY(rotated1.x, rotated1.y, rotated1.z, rotationY);
+                
+                let rotated2 = rotateX(p2.originalX, p2.originalY, p2.originalZ, rotationX);
+                rotated2 = rotateY(rotated2.x, rotated2.y, rotated2.z, rotationY);
+                
+                // 应用缩放
+                rotated1.x *= scale;
+                rotated1.y *= scale;
+                rotated1.z *= scale;
+                rotated2.x *= scale;
+                rotated2.y *= scale;
+                rotated2.z *= scale;
+                
+                // 投影到2D
+                const projected1 = project(rotated1.x, rotated1.y, rotated1.z);
+                const projected2 = project(rotated2.x, rotated2.y, rotated2.z);
+                
+                // 绘制线
+                ctx.beginPath();
+                ctx.moveTo(projected1.x, projected1.y);
+                ctx.lineTo(projected2.x, projected2.y);
+                ctx.stroke();
+            });
+            
+            // 绘制顶点
+            ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+            particles.forEach(particle => {
+                // 应用旋转
+                let rotated = rotateX(particle.originalX, particle.originalY, particle.originalZ, rotationX);
+                rotated = rotateY(rotated.x, rotated.y, rotated.z, rotationY);
+                
+                // 应用缩放
+                rotated.x *= scale;
+                rotated.y *= scale;
+                rotated.z *= scale;
+                
+                // 投影到2D
+                const projected = project(rotated.x, rotated.y, rotated.z);
+                
+                // 绘制点
+                ctx.beginPath();
+                ctx.arc(projected.x, projected.y, 4 * projected.scale, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+
+        // 启动动画
+        animate();
+    </script>
+</body>
+</html>
