@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>8大特效合集</title>
+    <title>7大特效合集</title>
     <style>
         * {
             margin: 0;
@@ -190,8 +190,8 @@
     <canvas class="effect-container" id="effectCanvas"></canvas>
     
     <div class="header">
-        <div class="title">✨ 8大特效合集 ✨</div>
-        <div class="subtitle">8种完整可用的视觉效果</div>
+        <div class="title">✨ 7大特效合集 ✨</div>
+        <div class="subtitle">7种完整可用的视觉效果</div>
     </div>
     
     <div class="performance" id="performance">
@@ -215,7 +215,7 @@
             <input type="range" class="slider" id="speedControl" min="1" max="10" value="5">
         </div>
         <div class="control-group">
-            <button class="toggle-btn" onclick="toggleFullscreen()">全屏模式</button>
+            <button class="toggle-btn" onclick="resetEffect()">重置效果</button>
             <button class="toggle-btn" onclick="screenshot()">截图保存</button>
         </div>
     </div>
@@ -226,7 +226,6 @@
         <button class="effect-btn" onclick="changeEffect('fire')">🔥 火焰效果</button>
         <button class="effect-btn" onclick="changeEffect('nebula')">🪐 星云漩涡</button>
         <button class="effect-btn" onclick="changeEffect('neural')">🧠 神经网络</button>
-        <button class="effect-btn" onclick="changeEffect('plasma')">🌈 等离子体</button>
         <button class="effect-btn" onclick="changeEffect('crystals')">❄️ 水晶生长</button>
         <button class="effect-btn" onclick="changeEffect('lightning')">⚡ 闪电网络</button>
     </div>
@@ -242,17 +241,17 @@
         let fps = 60;
         let mouse = { x: 0, y: 0 };
         let time = 0;
+        let globalSpeed = 1;
 
         // 效果配置
         const effectConfigs = {
             stars: { title: "星空粒子宇宙", description: "彩色粒子在太空中浮动，鼠标移动会产生引力和连线效果。", particleCount: 150, speed: 5 },
             matrix: { title: "矩阵数字雨", description: "经典的《黑客帝国》数字雨效果，绿色字符从屏幕上方落下。", particleCount: 200, speed: 3 },
-            fire: { title: "火焰效果", description: "逼真的火焰模拟，具有热力学上升和湍流效果。", particleCount: 200, speed: 6 },
+            fire: { title: "火焰效果", description: "逼真的火焰模拟，具有热力学上升和湍流效果。", particleCount: 300, speed: 6 },
             nebula: { title: "星云漩涡", description: "彩色星云在引力作用下旋转，形成美丽的宇宙漩涡。", particleCount: 180, speed: 3 },
             neural: { title: "神经网络", description: "人工神经网络的可视化，节点之间动态连接。", particleCount: 80, speed: 2 },
-            plasma: { title: "等离子体", description: "高温等离子体的动态模拟，具有电磁场相互作用。", particleCount: 150, speed: 4 },
             crystals: { title: "水晶生长", description: "模拟水晶的分形生长过程，形成复杂的几何图案。", particleCount: 15, speed: 1 },
-            lightning: { title: "闪电网络", description: "模拟大气中的闪电形成，具有分形放电效果。", particleCount: 3, speed: 8 }
+            lightning: { title: "闪电网络", description: "真实的分形闪电效果，具有分支放电特性。", particleCount: 2, speed: 8 }
         };
 
         function init() {
@@ -322,14 +321,17 @@
                     };
                     
                 case 'fire':
+                    // 更逼真的火焰粒子
+                    const heat = Math.random();
                     return {
-                        x: canvas.width / 2 + (Math.random() - 0.5) * 200,
-                        y: canvas.height,
-                        vx: (Math.random() - 0.5) * 3,
-                        vy: -2 - Math.random() * 6,
-                        size: Math.random() * 8 + 3,
-                        color: `hsl(${20 + Math.random() * 20}, 100%, ${50 + Math.random() * 30}%)`,
+                        x: canvas.width / 2 + (Math.random() - 0.5) * 300,
+                        y: canvas.height + Math.random() * 100,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: -3 - Math.random() * 8 - heat * 4,
+                        size: 5 + Math.random() * 10 + heat * 10,
+                        heat: heat,
                         life: 1,
+                        flicker: Math.random() * 0.2,
                         type: 'fire'
                     };
                     
@@ -359,18 +361,6 @@
                         type: 'neural'
                     };
                     
-                case 'plasma':
-                    return {
-                        x: Math.random() * canvas.width,
-                        y: Math.random() * canvas.height,
-                        charge: Math.random() > 0.5 ? 1 : -1,
-                        vx: (Math.random() - 0.5) * 4,
-                        vy: (Math.random() - 0.5) * 4,
-                        size: Math.random() * 4 + 2,
-                        color: Math.random() > 0.5 ? '#ff6b6b' : '#4ecdc4',
-                        type: 'plasma'
-                    };
-                    
                 case 'crystals':
                     return {
                         x: centerX + (Math.random() - 0.5) * 200,
@@ -385,14 +375,51 @@
                     };
                     
                 case 'lightning':
-                    return {
-                        x: Math.random() * canvas.width,
-                        y: 0,
-                        life: 0,
-                        maxLife: 40 + Math.random() * 60,
-                        type: 'lightning'
-                    };
+                    // 创建分形闪电
+                    return createFractalLightning(
+                        Math.random() * canvas.width,
+                        0,
+                        canvas.height * 0.8,
+                        5 // 递归深度
+                    );
             }
+        }
+
+        // 创建分形闪电
+        function createFractalLightning(startX, startY, length, depth) {
+            const segments = [];
+            
+            function createBranch(x, y, length, angle, depth) {
+                if (depth <= 0) return;
+                
+                const endX = x + Math.cos(angle) * length;
+                const endY = y + Math.sin(angle) * length;
+                
+                segments.push({
+                    startX: x, startY: y,
+                    endX: endX, endY: endY,
+                    depth: depth
+                });
+                
+                // 主分支
+                createBranch(endX, endY, length * 0.7, angle + (Math.random() - 0.5) * 0.5, depth - 1);
+                
+                // 随机创建侧分支
+                if (Math.random() > 0.3 && depth > 2) {
+                    createBranch(endX, endY, length * 0.4, angle + (Math.random() - 0.5) * 1.5, depth - 2);
+                }
+            }
+            
+            createBranch(startX, startY, length, Math.PI / 2, depth);
+            
+            return {
+                x: startX,
+                y: startY,
+                segments: segments,
+                life: 0,
+                maxLife: 30 + Math.random() * 40,
+                type: 'lightning'
+            };
         }
 
         function animate(currentTime) {
@@ -421,24 +448,24 @@
             switch(currentEffect) {
                 case 'stars': return 'rgba(0, 0, 0, 0.1)';
                 case 'matrix': return 'rgba(0, 0, 0, 0.05)';
-                case 'fire': return 'rgba(0, 0, 0, 0.2)';
+                case 'fire': return 'rgba(0, 0, 0, 0.3)';
                 case 'nebula': return 'rgba(0, 0, 20, 0.1)';
                 case 'neural': return 'rgba(0, 0, 20, 0.1)';
-                case 'plasma': return 'rgba(0, 0, 0, 0.2)';
                 case 'crystals': return 'rgba(0, 10, 20, 0.1)';
-                case 'lightning': return 'rgba(0, 0, 0, 0.3)';
+                case 'lightning': return 'rgba(0, 0, 0, 0.4)';
                 default: return 'rgba(0, 0, 0, 0.1)';
             }
         }
 
         function updateParticles() {
+            const speedMultiplier = globalSpeed;
+            
             particles.forEach((particle, index) => {
                 switch (particle.type) {
                     case 'star':
                     case 'neural':
-                    case 'plasma':
-                        particle.x += particle.vx;
-                        particle.y += particle.vy;
+                        particle.x += particle.vx * speedMultiplier;
+                        particle.y += particle.vy * speedMultiplier;
                         
                         if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
                         if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
@@ -446,25 +473,10 @@
                         if (particle.type === 'neural') {
                             particle.activation = 0.5 + 0.5 * Math.sin(time * 2 + index);
                         }
-                        
-                        if (particle.type === 'plasma') {
-                            particles.forEach((other, otherIndex) => {
-                                if (otherIndex !== index && other.type === 'plasma') {
-                                    const dx = other.x - particle.x;
-                                    const dy = other.y - particle.y;
-                                    const dist = Math.sqrt(dx * dx + dy * dy);
-                                    if (dist < 50) {
-                                        const force = (particle.charge * other.charge) / (dist * dist) * 0.1;
-                                        particle.vx += dx * force;
-                                        particle.vy += dy * force;
-                                    }
-                                }
-                            });
-                        }
                         break;
                         
                     case 'matrix':
-                        particle.y += particle.speed;
+                        particle.y += particle.speed * speedMultiplier;
                         particle.brightness = Math.min(1, particle.brightness + 0.02);
                         if (particle.y > canvas.height) {
                             particle.y = 0;
@@ -474,34 +486,46 @@
                         break;
                         
                     case 'fire':
-                        particle.x += particle.vx;
-                        particle.y += particle.vy;
-                        particle.vy += 0.05;
-                        particle.life -= 0.01;
-                        particle.size *= 0.99;
-                        if (particle.life <= 0 || particle.size < 0.5) {
+                        // 更逼真的火焰物理
+                        particle.x += particle.vx * speedMultiplier;
+                        particle.y += particle.vy * speedMultiplier;
+                        
+                        // 热空气上升效应
+                        particle.vy -= 0.1 * particle.heat * speedMultiplier;
+                        
+                        // 湍流效果
+                        particle.vx += (Math.random() - 0.5) * 0.5 * speedMultiplier;
+                        
+                        // 生命周期
+                        particle.life -= 0.01 * speedMultiplier;
+                        particle.size *= 0.98;
+                        
+                        // 闪烁效果
+                        particle.flicker = Math.sin(time * 10 + index) * 0.1 + 0.1;
+                        
+                        if (particle.life <= 0 || particle.size < 1) {
                             particles[index] = createParticle();
                         }
                         break;
                         
                     case 'nebula':
-                        particle.x += particle.vx;
-                        particle.y += particle.vy;
+                        particle.x += particle.vx * speedMultiplier;
+                        particle.y += particle.vy * speedMultiplier;
                         const dx = canvas.width/2 - particle.x;
                         const dy = canvas.height/2 - particle.y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
-                        particle.vx += dx * 0.0001;
-                        particle.vy += dy * 0.0001;
+                        particle.vx += dx * 0.0001 * speedMultiplier;
+                        particle.vy += dy * 0.0001 * speedMultiplier;
                         break;
                         
                     case 'crystal':
                         if (particle.size < particle.maxSize) {
-                            particle.size += particle.growthRate;
+                            particle.size += particle.growthRate * speedMultiplier;
                         }
                         break;
                         
                     case 'lightning':
-                        particle.life++;
+                        particle.life += speedMultiplier;
                         if (particle.life > particle.maxLife) {
                             particles[index] = createParticle();
                         }
@@ -516,7 +540,6 @@
                 
                 switch (particle.type) {
                     case 'star':
-                    case 'plasma':
                         ctx.fillStyle = particle.color;
                         ctx.beginPath();
                         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
@@ -530,12 +553,25 @@
                         break;
                         
                     case 'fire':
+                        // 更逼真的火焰绘制
+                        const alpha = particle.life * (0.7 + particle.flicker);
                         const gradient = ctx.createRadialGradient(
                             particle.x, particle.y, 0,
                             particle.x, particle.y, particle.size
                         );
-                        gradient.addColorStop(0, particle.color);
-                        gradient.addColorStop(1, 'rgba(255, 100, 0, 0)');
+                        
+                        if (particle.heat > 0.7) {
+                            // 高温核心
+                            gradient.addColorStop(0, `rgba(255, 255, 200, ${alpha})`);
+                            gradient.addColorStop(0.3, `rgba(255, 100, 0, ${alpha * 0.8})`);
+                            gradient.addColorStop(1, `rgba(255, 0, 0, 0)`);
+                        } else {
+                            // 低温火焰
+                            gradient.addColorStop(0, `rgba(255, 200, 100, ${alpha})`);
+                            gradient.addColorStop(0.5, `rgba(255, 100, 0, ${alpha * 0.6})`);
+                            gradient.addColorStop(1, `rgba(100, 0, 0, 0)`);
+                        }
+                        
                         ctx.fillStyle = gradient;
                         ctx.beginPath();
                         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
@@ -624,35 +660,32 @@
         }
 
         function drawLightning() {
-            if (Math.random() < 0.03 && particles.length < 8) {
+            // 随机生成新闪电
+            if (Math.random() < 0.02 && particles.length < 5) {
                 particles.push(createParticle());
             }
             
             particles.forEach((particle, index) => {
                 if (particle.type === 'lightning') {
-                    ctx.strokeStyle = '#4ecdc4';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(particle.x, particle.y);
+                    const lifeRatio = particle.life / particle.maxLife;
+                    const alpha = 1 - lifeRatio;
                     
-                    let currentX = particle.x;
-                    let currentY = particle.y;
-                    const numSegments = 20 + Math.floor(Math.random() * 15);
-                    
-                    for (let i = 0; i < numSegments; i++) {
-                        currentX += (Math.random() - 0.5) * 50;
-                        currentY += Math.random() * 80 + 30;
-                        ctx.lineTo(currentX, currentY);
-                    }
-                    
-                    ctx.stroke();
-                    
-                    // 发光效果
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 1;
-                    ctx.globalAlpha = 0.3;
-                    ctx.stroke();
-                    ctx.globalAlpha = 1;
+                    // 绘制所有闪电段
+                    particle.segments.forEach(segment => {
+                        const segmentAlpha = alpha * (segment.depth / 5);
+                        ctx.strokeStyle = `rgba(100, 200, 255, ${segmentAlpha})`;
+                        ctx.lineWidth = segment.depth * 0.8;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(segment.startX, segment.startY);
+                        ctx.lineTo(segment.endX, segment.endY);
+                        ctx.stroke();
+                        
+                        // 发光效果
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${segmentAlpha * 0.3})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    });
                 }
             });
         }
@@ -666,14 +699,8 @@
             initEffect();
         }
 
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`全屏错误: ${err.message}`);
-                });
-            } else {
-                document.exitFullscreen();
-            }
+        function resetEffect() {
+            initEffect();
         }
 
         function updateEffectInfo() {
@@ -681,6 +708,8 @@
             document.getElementById('effectTitle').textContent = config.title;
             document.getElementById('effectDescription').textContent = config.description;
             document.getElementById('particleCount').value = config.particleCount;
+            document.getElementById('speedControl').value = config.speed;
+            globalSpeed = config.speed / 5;
         }
 
         function updatePerformance() {
@@ -701,10 +730,15 @@
                 mouse.x = e.clientX;
                 mouse.y = e.clientY;
             });
+            
             document.getElementById('particleCount').addEventListener('input', (e) => {
                 const count = parseInt(e.target.value);
                 effectConfigs[currentEffect].particleCount = count;
                 initEffect();
+            });
+            
+            document.getElementById('speedControl').addEventListener('input', (e) => {
+                globalSpeed = parseInt(e.target.value) / 5;
             });
         }
 
