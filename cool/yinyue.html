@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐可视化宇宙</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+            cursor: none;
+        }
+        
+        .visualizer-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 50px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        .title {
+            font-size: 4em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #ff9ff3, #ff6b6b);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 8s ease infinite;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .subtitle {
+            font-size: 1.5em;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .music-controls {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 20px 0;
+            min-width: 300px;
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+        }
+        
+        .file-input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .file-input::file-selector-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .visualization-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .mode-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+        
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .audio-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 100;
+            font-size: 0.9em;
+            max-width: 250px;
+        }
+        
+        .spectrum-display {
+            height: 60px;
+            margin: 15px 0;
+            display: flex;
+            align-items: end;
+            gap: 2px;
+        }
+        
+        .frequency-bar {
+            flex: 1;
+            background: linear-gradient(to top, #ff6b6b, #4ecdc4);
+            border-radius: 2px 2px 0 0;
+            transition: height 0.1s ease;
+        }
+        
+        .custom-cursor {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            pointer-events: none;
+            z-index: 1000;
+            mix-blend-mode: difference;
+        }
+        
+        .cursor-outer {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            position: absolute;
+            animation: cursorPulse 2s infinite;
+        }
+        
+        .cursor-inner {
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px #fff;
+        }
+        
+        @keyframes cursorPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5em;
+            }
+            
+            .visualization-controls {
+                bottom: 10px;
+            }
+            
+            .mode-btn {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="visualizer-container" id="visualizer"></canvas>
+    <div class="particles" id="particles"></div>
+    
+    <div class="custom-cursor">
+        <div class="cursor-outer"></div>
+        <div class="cursor-inner"></div>
+    </div>
+    
+    <div class="audio-info" id="audioInfo">
+        <div>等待音乐加载...</div>
+        <div class="spectrum-display" id="spectrumDisplay"></div>
+        <div id="audioDetails"></div>
+    </div>
+    
+    <div class="content">
+        <h1 class="title">🎵 音乐可视化宇宙 🎵</h1>
+        <p class="subtitle">上传音乐文件，体验声音的视觉盛宴</p>
+        
+        <div class="music-controls">
+            <div class="control-group">
+                <label class="control-label">选择音乐文件</label>
+                <input type="file" class="file-input" id="audioFile" accept="audio/*">
+            </div>
+            
+            <div class="control-group">
+                <button class="btn" id="playBtn" disabled>播放</button>
+                <button class="btn" id="pauseBtn" disabled>暂停</button>
+                <button class="btn" id="stopBtn" disabled>停止</button>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">音量</label>
+                <input type="range" id="volumeControl" min="0" max="100" value="50" class="file-input">
+            </div>
+        </div>
+    </div>
+    
+    <div class="visualization-controls">
+        <button class="mode-btn active" onclick="changeVisualization('circle')">圆形波浪</button>
+        <button class="mode-btn" onclick="changeVisualization('bars')">频谱柱</button>
+        <button class="mode-btn" onclick="changeVisualization('particles')">粒子场</button>
+        <button class="mode-btn" onclick="changeVisualization('wave')">声波</button>
+        <button class="mode-btn" onclick="changeVisualization('spiral')">螺旋</button>
+        <button class="mode-btn" onclick="toggleParticles()">背景粒子</button>
+    </div>
+
+    <script>
+        // 音频分析器设置
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+        
+        // 音频元素
+        const audioElement = new Audio();
+        let source = null;
+        let isPlaying = false;
+        
+        // 可视化参数
+        let visualizationMode = 'circle';
+        let particlesEnabled = true;
+        
+        // 设置分析器
+        analyser.fftSize = 2048;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        const timeDataArray = new Uint8Array(bufferLength);
+        
+        // 调整canvas大小
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // 文件选择处理
+        document.getElementById('audioFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                audioElement.src = url;
+                
+                // 启用控制按钮
+                document.getElementById('playBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = false;
+                
+                // 更新音频信息
+                document.getElementById('audioInfo').innerHTML = `
+                    <div>文件: ${file.name}</div>
+                    <div>大小: ${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                    <div class="spectrum-display" id="spectrumDisplay"></div>
+                    <div id="audioDetails">准备播放...</div>
+                `;
+                
+                // 初始化频谱显示
+                initSpectrumDisplay();
+            }
+        });
+        
+        // 初始化频谱显示
+        function initSpectrumDisplay() {
+            const spectrumDisplay = document.getElementById('spectrumDisplay');
+            spectrumDisplay.innerHTML = '';
+            for (let i = 0; i < 32; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'frequency-bar';
+                bar.style.height = '5px';
+                spectrumDisplay.appendChild(bar);
+            }
+        }
+        
+        // 播放控制
+        document.getElementById('playBtn').addEventListener('click', function() {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            if (!source) {
+                source = audioContext.createMediaElementSource(audioElement);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+            }
+            
+            audioElement.play();
+            isPlaying = true;
+            updateAudioInfo();
+        });
+        
+        document.getElementById('pauseBtn').addEventListener('click', function() {
+            audioElement.pause();
+            isPlaying = false;
+        });
+        
+        document.getElementById('stopBtn').addEventListener('click', function() {
+            audioElement.pause();
+            audioElement.currentTime = 0;
+            isPlaying = false;
+        });
+        
+        // 音量控制
+        document.getElementById('volumeControl').addEventListener('input', function(e) {
+            audioElement.volume = e.target.value / 100;
+        });
+        
+        // 更新音频信息
+        function updateAudioInfo() {
+            if (!isPlaying) return;
+            
+            const details = document.getElementById('audioDetails');
+            const currentTime = formatTime(audioElement.currentTime);
+            const duration = formatTime(audioElement.duration);
+            const progress = (audioElement.currentTime / audioElement.duration) * 100;
+            
+            details.innerHTML = `
+                <div>播放中: ${currentTime} / ${duration}</div>
+                <div>进度: ${progress.toFixed(1)}%</div>
+            `;
+            
+            // 更新频谱显示
+            analyser.getByteFrequencyData(dataArray);
+            const bars = document.querySelectorAll('.frequency-bar');
+            bars.forEach((bar, i) => {
+                const value = dataArray[i * 2] || 0;
+                bar.style.height = (value / 255 * 50) + 'px';
+            });
+            
+            requestAnimationFrame(updateAudioInfo);
+        }
+        
+        // 时间格式化
+        function formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // 可视化模式切换
+        function changeVisualization(mode) {
+            visualizationMode = mode;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        // 背景粒子开关
+        function toggleParticles() {
+            particlesEnabled = !particlesEnabled;
+            event.target.textContent = particlesEnabled ? '背景粒子' : '开启粒子';
+        }
+        
+        // 可视化绘制函数
+        function drawVisualization() {
+            if (!isPlaying) {
+                // 空闲状态动画
+                drawIdleAnimation();
+            } else {
+                // 获取音频数据
+                analyser.getByteFrequencyData(dataArray);
+                analyser.getByteTimeDomainData(timeDataArray);
+                
+                // 根据模式绘制
+                switch (visualizationMode) {
+                    case 'circle':
+                        drawCircleVisualizer();
+                        break;
+                    case 'bars':
+                        drawBarsVisualizer();
+                        break;
+                    case 'particles':
+                        drawParticlesVisualizer();
+                        break;
+                    case 'wave':
+                        drawWaveVisualizer();
+                        break;
+                    case 'spiral':
+                        drawSpiralVisualizer();
+                        break;
+                }
+            }
+            
+            // 绘制背景粒子
+            if (particlesEnabled) {
+                drawBackgroundParticles();
+            }
+            
+            requestAnimationFrame(drawVisualization);
+        }
+        
+        // 各种可视化效果
+        function drawCircleVisualizer() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(canvas.width, canvas.height) / 3;
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.stroke();
+            
+            for (let i = 0; i < bufferLength; i += 4) {
+                const value = dataArray[i] / 255;
+                const angle = (i / bufferLength) * Math.PI * 2;
+                const barLength = value * radius * 0.8;
+                
+                const x1 = centerX + Math.cos(angle) * radius;
+                const y1 = centerY + Math.sin(angle) * radius;
+                const x2 = centerX + Math.cos(angle) * (radius + barLength);
+                const y2 = centerY + Math.sin(angle) * (radius + barLength);
+                
+                const hue = (i / bufferLength) * 360;
+                ctx.strokeStyle = `hsla(${hue}, 100%, 60%, ${value})`;
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+        }
+        
+        function drawBarsVisualizer() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const barWidth = (canvas.width / bufferLength) * 2.5;
+            let x = 0;
+            
+            for (let i = 0; i < bufferLength; i++) {
+                const barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
+                const hue = (i / bufferLength) * 360;
+                
+                ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.8)`;
+                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                
+                x += barWidth + 1;
+            }
+        }
+        
+        function drawParticlesVisualizer() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            for (let i = 0; i < bufferLength; i += 2) {
+                const value = dataArray[i] / 255;
+                const angle = (i / bufferLength) * Math.PI * 2;
+                const distance = value * Math.min(canvas.width, canvas.height) / 3;
+                
+                const x = centerX + Math.cos(angle) * distance;
+                const y = centerY + Math.sin(angle) * distance;
+                const size = value * 5 + 1;
+                
+                const hue = (i / bufferLength) * 360;
+                ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${value})`;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawWaveVisualizer() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            const sliceWidth = canvas.width / bufferLength;
+            let x = 0;
+            
+            for (let i = 0; i < bufferLength; i++) {
+                const v = timeDataArray[i] / 128.0;
+                const y = v * canvas.height / 2;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                
+                x += sliceWidth;
+            }
+            
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, '#ff6b6b');
+            gradient.addColorStop(0.5, '#4ecdc4');
+            gradient.addColorStop(1, '#ff6b6b');
+            
+            ctx.strokeStyle = gradient;
+            ctx.stroke();
+        }
+        
+        function drawSpiralVisualizer() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const maxRadius = Math.min(canvas.width, canvas.height) / 2;
+            
+            ctx.beginPath();
+            for (let i = 0; i < bufferLength; i++) {
+                const value = dataArray[i] / 255;
+                const angle = (i / bufferLength) * Math.PI * 8;
+                const radius = (i / bufferLength) * maxRadius + value * 50;
+                
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius);
+            gradient.addColorStop(0, '#ff6b6b');
+            gradient.addColorStop(0.5, '#4ecdc4');
+            gradient.addColorStop(1, '#45b7d1');
+            
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        function drawIdleAnimation() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const time = Date.now() * 0.001;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const maxRadius = Math.min(canvas.width, canvas.height) / 3;
+            
+            for (let i = 0; i < 8; i++) {
+                const angle = time + (i / 8) * Math.PI * 2;
+                const radius = maxRadius * 0.7 + Math.sin(time * 2 + i) * maxRadius * 0.3;
+                
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                const size = 10 + Math.sin(time * 3 + i) * 5;
+                
+                const hue = (time * 50 + i * 45) % 360;
+                ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.7)`;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawBackgroundParticles() {
+            const time = Date.now() * 0.001;
+            
+            for (let i = 0; i < 5; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const size = Math.random() * 2 + 0.5;
+                const hue = (time * 20 + i * 72) % 360;
+                
+                ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.3)`;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // 自定义光标
+        const cursor = document.querySelector('.custom-cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+        
+        // 启动可视化
+        drawVisualization();
+        
+        // 初始化频谱显示
+        initSpectrumDisplay();
+    </script>
+</body>
+</html>
