@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赛博朋克矩阵雨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: none;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 100;
+            text-align: center;
+            background: rgba(0, 20, 40, 0.8);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid #00ffff;
+            box-shadow: 0 0 30px #00ffff, inset 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        
+        h1 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+            font-size: 2.5em;
+            letter-spacing: 3px;
+        }
+        
+        p {
+            color: #00ff00;
+            margin: 8px 0;
+            text-shadow: 0 0 5px #00ff00;
+            font-size: 1.1em;
+        }
+        
+        .glitch {
+            animation: glitch 2s infinite;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: scan 3s linear infinite;
+            z-index: 99;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 1000;
+            mix-blend-mode: difference;
+        }
+        
+        .cursor-dot {
+            width: 4px;
+            height: 4px;
+            background: #00ffff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px #00ffff;
+        }
+        
+        .cursor-ring {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #00ffff;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+    <div class="scan-line"></div>
+    <div class="custom-cursor">
+        <div class="cursor-dot"></div>
+        <div class="cursor-ring"></div>
+    </div>
+    
+    <div class="container">
+        <h1 class="glitch">MATRIX SYSTEM</h1>
+        <p>欢迎进入数字矩阵</p>
+        <p>用户: XIAOYE_TERMINAL</p>
+        <p>状态: CONNECTED</p>
+        <p>加密级别: MAXIMUM</p>
+        <p style="color: #ffff00; margin-top: 15px;">>> 系统运行中 <<</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 设置canvas大小
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // 矩阵字符
+        const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+        const charArray = chars.split('');
+        
+        // 列配置
+        const fontSize = 14;
+        const columns = Math.floor(canvas.width / fontSize);
+        const drops = [];
+        
+        // 初始化列
+        for (let i = 0; i < columns; i++) {
+            drops[i] = {
+                y: Math.random() * -canvas.height,
+                speed: 2 + Math.random() * 5,
+                length: 10 + Math.random() * 20
+            };
+        }
+
+        // 自定义光标跟随
+        const cursor = document.querySelector('.custom-cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            
+            // 创建光标轨迹
+            createTrail(e.clientX, e.clientY);
+        });
+
+        // 光标轨迹效果
+        function createTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.style.cssText = `
+                position: fixed;
+                width: 6px;
+                height: 6px;
+                background: #00ffff;
+                border-radius: 50%;
+                left: ${x}px;
+                top: ${y}px;
+                pointer-events: none;
+                z-index: 999;
+                box-shadow: 0 0 15px #00ffff;
+                animation: fadeOut 0.5s forwards;
+            `;
+            
+            document.body.appendChild(trail);
+            
+            setTimeout(() => {
+                if (trail.parentNode) {
+                    trail.parentNode.removeChild(trail);
+                }
+            }, 500);
+        }
+
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; transform: scale(1); }
+                to { opacity: 0; transform: scale(0.5); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 绘制矩阵雨
+        function drawMatrix() {
+            // 半透明黑色背景创造拖尾效果
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = `${fontSize}px 'Courier New', monospace`;
+            
+            for (let i = 0; i < drops.length; i++) {
+                // 随机字符
+                const char = charArray[Math.floor(Math.random() * charArray.length)];
+                
+                // 计算位置
+                const x = i * fontSize;
+                const drop = drops[i];
+                
+                // 绘制字符列
+                for (let j = 0; j < drop.length; j++) {
+                    const y = drop.y - j * fontSize;
+                    if (y < 0) continue;
+                    
+                    // 渐变颜色：头部亮绿色，尾部青色
+                    const alpha = 1 - (j / drop.length);
+                    const color = j === 0 ? 
+                        `rgba(255, 255, 255, ${alpha})` : 
+                        `rgba(0, ${255 * alpha}, ${255 * alpha}, ${alpha})`;
+                    
+                    ctx.fillStyle = color;
+                    ctx.fillText(char, x, y);
+                    
+                    // 头部字符发光效果
+                    if (j === 0) {
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = '#00ff00';
+                    } else {
+                        ctx.shadowBlur = 0;
+                    }
+                }
+                
+                // 更新位置
+                drop.y += drop.speed;
+                
+                // 重置位置
+                if (drop.y > canvas.height + drop.length * fontSize) {
+                    drop.y = Math.random() * -100;
+                    drop.speed = 2 + Math.random() * 5;
+                    drop.length = 10 + Math.random() * 20;
+                }
+            }
+        }
+
+        // 动画循环
+        function animate() {
+            drawMatrix();
+            requestAnimationFrame(animate);
+        }
+
+        // 启动动画
+        animate();
+
+        // 添加随机闪烁效果
+        setInterval(() => {
+            const randomColumn = Math.floor(Math.random() * drops.length);
+            drops[randomColumn].speed *= 2;
+            setTimeout(() => {
+                drops[randomColumn].speed /= 2;
+            }, 200);
+        }, 1000);
+
+        // 添加键盘输入效果
+        document.addEventListener('keydown', (e) => {
+            createKeyEffect(e.key);
+        });
+
+        function createKeyEffect(key) {
+            const effect = document.createElement('div');
+            effect.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: #00ffff;
+                font-size: 48px;
+                font-weight: bold;
+                text-shadow: 0 0 20px #00ffff;
+                opacity: 0;
+                pointer-events: none;
+                z-index: 1000;
+                animation: keyEffect 1s forwards;
+            `;
+            effect.textContent = key.toUpperCase();
+            
+            const keyStyle = document.createElement('style');
+            keyStyle.textContent = `
+                @keyframes keyEffect {
+                    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    100% { opacity: 0; transform: translate(-50%, -50%) scale(3); }
+                }
+            `;
+            document.head.appendChild(keyStyle);
+            
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                if (effect.parentNode) {
+                    effect.parentNode.removeChild(effect);
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
