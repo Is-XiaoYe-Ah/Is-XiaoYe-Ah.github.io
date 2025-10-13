@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8大特效合集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .effect-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            z-index: 100;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .title {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #ff9ff3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1em;
+        }
+        
+        .effects-grid {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            z-index: 100;
+            max-width: 90vw;
+        }
+        
+        .effect-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .effect-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .effect-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            border-color: #4ecdc4;
+        }
+        
+        .control-panel {
+            position: fixed;
+            top: 120px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 100;
+            min-width: 200px;
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+        }
+        
+        .slider {
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn.active {
+            background: #4ecdc4;
+        }
+        
+        .info-panel {
+            position: fixed;
+            top: 120px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 100;
+            max-width: 300px;
+        }
+        
+        .info-title {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .info-description {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        
+        .performance {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 100;
+            font-size: 0.8em;
+            color: #ccc;
+        }
+        
+        @media (max-width: 768px) {
+            .effects-grid {
+                grid-template-columns: repeat(2, 1fr);
+                bottom: 10px;
+            }
+            
+            .title {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="effect-container" id="effectCanvas"></canvas>
+    
+    <div class="header">
+        <div class="title">✨ 8大特效合集 ✨</div>
+        <div class="subtitle">8种完整可用的视觉效果</div>
+    </div>
+    
+    <div class="performance" id="performance">
+        FPS: 60 | 效果: 星空粒子
+    </div>
+    
+    <div class="info-panel">
+        <div class="info-title" id="effectTitle">星空粒子宇宙</div>
+        <div class="info-description" id="effectDescription">
+            彩色粒子在太空中浮动，鼠标移动会产生引力和连线效果。
+        </div>
+    </div>
+    
+    <div class="control-panel">
+        <div class="control-group">
+            <label class="control-label">粒子数量</label>
+            <input type="range" class="slider" id="particleCount" min="10" max="500" value="150">
+        </div>
+        <div class="control-group">
+            <label class="control-label">运动速度</label>
+            <input type="range" class="slider" id="speedControl" min="1" max="10" value="5">
+        </div>
+        <div class="control-group">
+            <button class="toggle-btn" onclick="toggleFullscreen()">全屏模式</button>
+            <button class="toggle-btn" onclick="screenshot()">截图保存</button>
+        </div>
+    </div>
+    
+    <div class="effects-grid">
+        <button class="effect-btn active" onclick="changeEffect('stars')">🌌 星空粒子</button>
+        <button class="effect-btn" onclick="changeEffect('matrix')">💻 矩阵数字雨</button>
+        <button class="effect-btn" onclick="changeEffect('fire')">🔥 火焰效果</button>
+        <button class="effect-btn" onclick="changeEffect('nebula')">🪐 星云漩涡</button>
+        <button class="effect-btn" onclick="changeEffect('neural')">🧠 神经网络</button>
+        <button class="effect-btn" onclick="changeEffect('plasma')">🌈 等离子体</button>
+        <button class="effect-btn" onclick="changeEffect('crystals')">❄️ 水晶生长</button>
+        <button class="effect-btn" onclick="changeEffect('lightning')">⚡ 闪电网络</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('effectCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentEffect = 'stars';
+        let particles = [];
+        let animationId = null;
+        let lastTime = 0;
+        let frameCount = 0;
+        let fps = 60;
+        let mouse = { x: 0, y: 0 };
+        let time = 0;
+
+        // 效果配置
+        const effectConfigs = {
+            stars: { title: "星空粒子宇宙", description: "彩色粒子在太空中浮动，鼠标移动会产生引力和连线效果。", particleCount: 150, speed: 5 },
+            matrix: { title: "矩阵数字雨", description: "经典的《黑客帝国》数字雨效果，绿色字符从屏幕上方落下。", particleCount: 200, speed: 3 },
+            fire: { title: "火焰效果", description: "逼真的火焰模拟，具有热力学上升和湍流效果。", particleCount: 200, speed: 6 },
+            nebula: { title: "星云漩涡", description: "彩色星云在引力作用下旋转，形成美丽的宇宙漩涡。", particleCount: 180, speed: 3 },
+            neural: { title: "神经网络", description: "人工神经网络的可视化，节点之间动态连接。", particleCount: 80, speed: 2 },
+            plasma: { title: "等离子体", description: "高温等离子体的动态模拟，具有电磁场相互作用。", particleCount: 150, speed: 4 },
+            crystals: { title: "水晶生长", description: "模拟水晶的分形生长过程，形成复杂的几何图案。", particleCount: 15, speed: 1 },
+            lightning: { title: "闪电网络", description: "模拟大气中的闪电形成，具有分形放电效果。", particleCount: 3, speed: 8 }
+        };
+
+        function init() {
+            resizeCanvas();
+            initEffect();
+            animate();
+            setupEventListeners();
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function initEffect() {
+            particles = [];
+            const config = effectConfigs[currentEffect];
+            
+            for (let i = 0; i < config.particleCount; i++) {
+                particles.push(createParticle());
+            }
+            
+            if (currentEffect === 'neural') {
+                initNeuralConnections();
+            }
+            
+            updateEffectInfo();
+        }
+
+        function initNeuralConnections() {
+            particles.forEach(particle => {
+                particle.connections = [];
+                const connectionCount = 3 + Math.floor(Math.random() * 3);
+                for (let i = 0; i < connectionCount; i++) {
+                    const targetIndex = Math.floor(Math.random() * particles.length);
+                    if (targetIndex !== particles.indexOf(particle)) {
+                        particle.connections.push(targetIndex);
+                    }
+                }
+            });
+        }
+
+        function createParticle() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            switch(currentEffect) {
+                case 'stars':
+                    return {
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2,
+                        size: Math.random() * 3 + 1,
+                        color: `hsl(${Math.random() * 360}, 100%, 60%)`,
+                        type: 'star'
+                    };
+                    
+                case 'matrix':
+                    return {
+                        x: Math.floor(Math.random() * canvas.width / 14) * 14,
+                        y: Math.random() * -canvas.height,
+                        speed: 2 + Math.random() * 8,
+                        char: String.fromCharCode(0x30A0 + Math.random() * 96),
+                        brightness: Math.random() * 0.3,
+                        type: 'matrix'
+                    };
+                    
+                case 'fire':
+                    return {
+                        x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+                        y: canvas.height,
+                        vx: (Math.random() - 0.5) * 3,
+                        vy: -2 - Math.random() * 6,
+                        size: Math.random() * 8 + 3,
+                        color: `hsl(${20 + Math.random() * 20}, 100%, ${50 + Math.random() * 30}%)`,
+                        life: 1,
+                        type: 'fire'
+                    };
+                    
+                case 'nebula':
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * Math.min(canvas.width, canvas.height) * 0.4;
+                    return {
+                        x: centerX + Math.cos(angle) * distance,
+                        y: centerY + Math.sin(angle) * distance,
+                        vx: -Math.sin(angle) * 0.5,
+                        vy: Math.cos(angle) * 0.5,
+                        size: Math.random() * 4 + 1,
+                        color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+                        type: 'nebula'
+                    };
+                    
+                case 'neural':
+                    return {
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        activation: Math.random(),
+                        size: Math.random() * 8 + 4,
+                        color: `hsl(200, 100%, 60%)`,
+                        connections: [],
+                        type: 'neural'
+                    };
+                    
+                case 'plasma':
+                    return {
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        charge: Math.random() > 0.5 ? 1 : -1,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: (Math.random() - 0.5) * 4,
+                        size: Math.random() * 4 + 2,
+                        color: Math.random() > 0.5 ? '#ff6b6b' : '#4ecdc4',
+                        type: 'plasma'
+                    };
+                    
+                case 'crystals':
+                    return {
+                        x: centerX + (Math.random() - 0.5) * 200,
+                        y: centerY + (Math.random() - 0.5) * 200,
+                        angle: Math.random() * Math.PI * 2,
+                        branches: Math.floor(Math.random() * 6) + 4,
+                        size: 2,
+                        growthRate: Math.random() * 0.3 + 0.1,
+                        maxSize: 40 + Math.random() * 60,
+                        color: `hsl(${Math.random() * 60 + 180}, 100%, 70%)`,
+                        type: 'crystal'
+                    };
+                    
+                case 'lightning':
+                    return {
+                        x: Math.random() * canvas.width,
+                        y: 0,
+                        life: 0,
+                        maxLife: 40 + Math.random() * 60,
+                        type: 'lightning'
+                    };
+            }
+        }
+
+        function animate(currentTime) {
+            time = currentTime * 0.001;
+            
+            frameCount++;
+            if (currentTime - lastTime >= 1000) {
+                fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+                frameCount = 0;
+                lastTime = currentTime;
+                updatePerformance();
+            }
+            
+            ctx.fillStyle = getBackgroundColor();
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            updateParticles();
+            drawParticles();
+            drawConnections();
+            drawSpecialEffects();
+            
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function getBackgroundColor() {
+            switch(currentEffect) {
+                case 'stars': return 'rgba(0, 0, 0, 0.1)';
+                case 'matrix': return 'rgba(0, 0, 0, 0.05)';
+                case 'fire': return 'rgba(0, 0, 0, 0.2)';
+                case 'nebula': return 'rgba(0, 0, 20, 0.1)';
+                case 'neural': return 'rgba(0, 0, 20, 0.1)';
+                case 'plasma': return 'rgba(0, 0, 0, 0.2)';
+                case 'crystals': return 'rgba(0, 10, 20, 0.1)';
+                case 'lightning': return 'rgba(0, 0, 0, 0.3)';
+                default: return 'rgba(0, 0, 0, 0.1)';
+            }
+        }
+
+        function updateParticles() {
+            particles.forEach((particle, index) => {
+                switch (particle.type) {
+                    case 'star':
+                    case 'neural':
+                    case 'plasma':
+                        particle.x += particle.vx;
+                        particle.y += particle.vy;
+                        
+                        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
+                        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
+                        
+                        if (particle.type === 'neural') {
+                            particle.activation = 0.5 + 0.5 * Math.sin(time * 2 + index);
+                        }
+                        
+                        if (particle.type === 'plasma') {
+                            particles.forEach((other, otherIndex) => {
+                                if (otherIndex !== index && other.type === 'plasma') {
+                                    const dx = other.x - particle.x;
+                                    const dy = other.y - particle.y;
+                                    const dist = Math.sqrt(dx * dx + dy * dy);
+                                    if (dist < 50) {
+                                        const force = (particle.charge * other.charge) / (dist * dist) * 0.1;
+                                        particle.vx += dx * force;
+                                        particle.vy += dy * force;
+                                    }
+                                }
+                            });
+                        }
+                        break;
+                        
+                    case 'matrix':
+                        particle.y += particle.speed;
+                        particle.brightness = Math.min(1, particle.brightness + 0.02);
+                        if (particle.y > canvas.height) {
+                            particle.y = 0;
+                            particle.brightness = 0;
+                            particle.x = Math.floor(Math.random() * canvas.width / 14) * 14;
+                        }
+                        break;
+                        
+                    case 'fire':
+                        particle.x += particle.vx;
+                        particle.y += particle.vy;
+                        particle.vy += 0.05;
+                        particle.life -= 0.01;
+                        particle.size *= 0.99;
+                        if (particle.life <= 0 || particle.size < 0.5) {
+                            particles[index] = createParticle();
+                        }
+                        break;
+                        
+                    case 'nebula':
+                        particle.x += particle.vx;
+                        particle.y += particle.vy;
+                        const dx = canvas.width/2 - particle.x;
+                        const dy = canvas.height/2 - particle.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        particle.vx += dx * 0.0001;
+                        particle.vy += dy * 0.0001;
+                        break;
+                        
+                    case 'crystal':
+                        if (particle.size < particle.maxSize) {
+                            particle.size += particle.growthRate;
+                        }
+                        break;
+                        
+                    case 'lightning':
+                        particle.life++;
+                        if (particle.life > particle.maxLife) {
+                            particles[index] = createParticle();
+                        }
+                        break;
+                }
+            });
+        }
+
+        function drawParticles() {
+            particles.forEach(particle => {
+                ctx.save();
+                
+                switch (particle.type) {
+                    case 'star':
+                    case 'plasma':
+                        ctx.fillStyle = particle.color;
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                        
+                    case 'matrix':
+                        ctx.fillStyle = `rgba(0, 255, 0, ${particle.brightness})`;
+                        ctx.font = '14px "Courier New", monospace';
+                        ctx.fillText(particle.char, particle.x, particle.y);
+                        break;
+                        
+                    case 'fire':
+                        const gradient = ctx.createRadialGradient(
+                            particle.x, particle.y, 0,
+                            particle.x, particle.y, particle.size
+                        );
+                        gradient.addColorStop(0, particle.color);
+                        gradient.addColorStop(1, 'rgba(255, 100, 0, 0)');
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                        
+                    case 'nebula':
+                        ctx.fillStyle = particle.color;
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                        
+                    case 'neural':
+                        const nodeColor = `hsla(200, 100%, ${50 + particle.activation * 30}%, 0.8)`;
+                        ctx.fillStyle = nodeColor;
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                        
+                    case 'crystal':
+                        ctx.strokeStyle = particle.color;
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        for (let i = 0; i < particle.branches; i++) {
+                            const angle = particle.angle + (i * 2 * Math.PI) / particle.branches;
+                            const endX = particle.x + Math.cos(angle) * particle.size;
+                            const endY = particle.y + Math.sin(angle) * particle.size;
+                            ctx.moveTo(particle.x, particle.y);
+                            ctx.lineTo(endX, endY);
+                        }
+                        ctx.stroke();
+                        break;
+                }
+                
+                ctx.restore();
+            });
+        }
+
+        function drawConnections() {
+            if (['stars', 'neural'].includes(currentEffect)) {
+                ctx.strokeStyle = currentEffect === 'stars' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(100, 200, 255, 0.3)';
+                ctx.lineWidth = currentEffect === 'neural' ? 2 : 0.5;
+                
+                if (currentEffect === 'neural') {
+                    particles.forEach(particle => {
+                        particle.connections.forEach(connIndex => {
+                            const target = particles[connIndex];
+                            if (target) {
+                                const alpha = 0.3 * (particle.activation + target.activation) / 2;
+                                ctx.strokeStyle = `rgba(100, 200, 255, ${alpha})`;
+                                ctx.beginPath();
+                                ctx.moveTo(particle.x, particle.y);
+                                ctx.lineTo(target.x, target.y);
+                                ctx.stroke();
+                            }
+                        });
+                    });
+                } else {
+                    for (let i = 0; i < particles.length; i++) {
+                        for (let j = i + 1; j < particles.length; j++) {
+                            const p1 = particles[i];
+                            const p2 = particles[j];
+                            const dx = p1.x - p2.x;
+                            const dy = p1.y - p2.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            if (distance < 100) {
+                                ctx.globalAlpha = 1 - distance / 100;
+                                ctx.beginPath();
+                                ctx.moveTo(p1.x, p1.y);
+                                ctx.lineTo(p2.x, p2.y);
+                                ctx.stroke();
+                            }
+                        }
+                    }
+                    ctx.globalAlpha = 1;
+                }
+            }
+        }
+
+        function drawSpecialEffects() {
+            if (currentEffect === 'lightning') {
+                drawLightning();
+            }
+        }
+
+        function drawLightning() {
+            if (Math.random() < 0.03 && particles.length < 8) {
+                particles.push(createParticle());
+            }
+            
+            particles.forEach((particle, index) => {
+                if (particle.type === 'lightning') {
+                    ctx.strokeStyle = '#4ecdc4';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(particle.x, particle.y);
+                    
+                    let currentX = particle.x;
+                    let currentY = particle.y;
+                    const numSegments = 20 + Math.floor(Math.random() * 15);
+                    
+                    for (let i = 0; i < numSegments; i++) {
+                        currentX += (Math.random() - 0.5) * 50;
+                        currentY += Math.random() * 80 + 30;
+                        ctx.lineTo(currentX, currentY);
+                    }
+                    
+                    ctx.stroke();
+                    
+                    // 发光效果
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1;
+                    ctx.globalAlpha = 0.3;
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+            });
+        }
+
+        function changeEffect(effect) {
+            currentEffect = effect;
+            document.querySelectorAll('.effect-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            initEffect();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`全屏错误: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function updateEffectInfo() {
+            const config = effectConfigs[currentEffect];
+            document.getElementById('effectTitle').textContent = config.title;
+            document.getElementById('effectDescription').textContent = config.description;
+            document.getElementById('particleCount').value = config.particleCount;
+        }
+
+        function updatePerformance() {
+            document.getElementById('performance').textContent = 
+                `FPS: ${fps} | 效果: ${effectConfigs[currentEffect].title}`;
+        }
+
+        function screenshot() {
+            const link = document.createElement('a');
+            link.download = `特效-${currentEffect}-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function setupEventListeners() {
+            window.addEventListener('resize', resizeCanvas);
+            canvas.addEventListener('mousemove', (e) => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            });
+            document.getElementById('particleCount').addEventListener('input', (e) => {
+                const count = parseInt(e.target.value);
+                effectConfigs[currentEffect].particleCount = count;
+                initEffect();
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
