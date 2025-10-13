@@ -5,28 +5,183 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>欢迎来到小野的网站</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             background-color: #f0f0f0;
             margin: 0;
             padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.8s ease;
+            position: relative;
+            overflow: hidden;
         }
+        
         .container {
             padding: 50px;
+            position: relative;
+            z-index: 2;
         }
+        
         h1 {
-            color: #333;
+            color: #333333;
+            transition: color 0.8s ease;
         }
+        
         p {
-            color: #666;
+            color: #666666;
+            transition: color 0.8s ease;
+        }
+        
+        /* 颜色覆盖层 - 用于转场效果 */
+        .color-overlay {
+            position: fixed;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, transparent 0%, var(--overlay-color) 100%);
+            transition: all 0.8s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* 左上角热区 */
+        .corner-hotspot {
+            position: fixed;
+            width: 80px;
+            height: 80px;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
+    <div class="color-overlay" id="colorOverlay"></div>
+    
+    <!-- 只保留左上角热区 -->
+    <div class="corner-hotspot"></div>
+    
     <div class="container">
         <h1>欢迎来到小野的网站</h1>
         <p>我很高兴您来到这里！</p>
     </div>
+
+    <script>
+        // 颜色配置（全浅色方案）
+        const colorSchemes = {
+            gray: {
+                bg: '#f0f0f0',
+                h1: '#333333',
+                p: '#666666'
+            },
+            red: {
+                bg: '#ffe6e6',
+                h1: '#c84a4a',
+                p: '#c96b6b'
+            },
+            orange: {
+                bg: '#fff0e6',
+                h1: '#c87c4a',
+                p: '#c9956b'
+            },
+            yellow: {
+                bg: '#fffde6',
+                h1: '#c8b84a',
+                p: '#c9c06b'
+            },
+            green: {
+                bg: '#e6ffe6',
+                h1: '#4ac84a',
+                p: '#6bc96b'
+            },
+            cyan: {
+                bg: '#e6ffff',
+                h1: '#4ac8c8',
+                p: '#6bc9c9'
+            },
+            blue: {
+                bg: '#e6f2ff',
+                h1: '#4a7bc8',
+                p: '#6b93c9'
+            },
+            purple: {
+                bg: '#f2e6ff',
+                h1: '#7b4ac8',
+                p: '#936bc9'
+            }
+        };
+
+        // 颜色切换顺序：灰->红->橙->黄->绿->青->蓝->紫
+        const colorOrder = ['gray', 'red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'];
+        let currentColorIndex = 0;
+        let isAnimating = false; // 动画状态锁
+
+        const body = document.body;
+        const colorOverlay = document.getElementById('colorOverlay');
+        const hotspot = document.querySelector('.corner-hotspot');
+
+        // 初始化
+        updateColors(colorOrder[currentColorIndex]);
+
+        // 为左上角热区添加鼠标进入事件
+        hotspot.addEventListener('mouseenter', function() {
+            // 如果正在动画中，忽略此次触发
+            if (isAnimating) return;
+            
+            // 设置动画状态锁
+            isAnimating = true;
+            
+            // 切换到下一个颜色
+            currentColorIndex = (currentColorIndex + 1) % colorOrder.length;
+            const nextColor = colorOrder[currentColorIndex];
+            
+            // 设置覆盖层起始位置（左上角）
+            colorOverlay.style.left = '0px';
+            colorOverlay.style.top = '0px';
+            colorOverlay.style.width = '0';
+            colorOverlay.style.height = '0';
+            colorOverlay.style.setProperty('--overlay-color', colorSchemes[nextColor].bg);
+            
+            // 开始转场动画
+            setTimeout(() => {
+                const maxSize = Math.max(window.innerWidth, window.innerHeight) * 2;
+                colorOverlay.style.width = maxSize + 'px';
+                colorOverlay.style.height = maxSize + 'px';
+                colorOverlay.style.left = (-maxSize / 2) + 'px';
+                colorOverlay.style.top = (-maxSize / 2) + 'px';
+                
+                // 动画结束后更新背景色并重置状态
+                setTimeout(() => {
+                    updateColors(nextColor);
+                    colorOverlay.style.width = '0';
+                    colorOverlay.style.height = '0';
+                    
+                    // 动画完成后解锁
+                    setTimeout(() => {
+                        isAnimating = false;
+                    }, 100); // 额外延迟确保完全结束
+                }, 800);
+            }, 50);
+        });
+
+        function updateColors(colorName) {
+            const scheme = colorSchemes[colorName];
+            body.style.backgroundColor = scheme.bg;
+            document.querySelector('h1').style.color = scheme.h1;
+            document.querySelectorAll('p').forEach(p => {
+                p.style.color = scheme.p;
+            });
+        }
+    </script>
 </body>
 </html>
