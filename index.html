@@ -74,23 +74,27 @@
             transform: scale(1.1);
         }
         
-        .corner-hotspot:hover::before {
-            content: "点击切换颜色 🎨";
+        /* 提示文字样式 */
+        .corner-hotspot::before {
+            content: "切换颜色 🎨";
             position: absolute;
-            top: 85px;
+            top: 0;
             left: 0;
             background: rgba(0,0,0,0.8);
             color: white;
             padding: 8px 12px;
-            border-radius: 6px;
+            border-radius: 0 0 6px 0;
             font-size: 12px;
             white-space: nowrap;
-            animation: fadeIn 0.3s ease;
+            opacity: 0; /* 默认隐藏 */
+            transform: translateY(-10px); /* 默认在上方 */
+            transition: all 0.3s ease; /* 添加过渡动画 */
+            pointer-events: none; /* 防止干扰鼠标事件 */
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .corner-hotspot:hover::before {
+            opacity: 1; /* 显示 */
+            transform: translateY(0); /* 移动到正常位置 */
         }
         
         /* 提示文字 */
