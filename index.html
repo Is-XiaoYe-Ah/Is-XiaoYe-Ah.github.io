@@ -12,7 +12,7 @@
         }
         
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
             background-color: #f0f0f0;
             margin: 0;
@@ -34,11 +34,14 @@
         
         h1 {
             color: #333333;
+            font-size: 2.5em;
+            margin-bottom: 20px;
             transition: color 0.8s ease;
         }
         
         p {
             color: #666666;
+            font-size: 1.2em;
             transition: color 0.8s ease;
         }
         
@@ -48,9 +51,11 @@
             width: 0;
             height: 0;
             background: radial-gradient(circle, transparent 0%, var(--overlay-color) 100%);
-            transition: all 0.8s ease;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
             z-index: 1;
+            mix-blend-mode: multiply;
+            opacity: 0.9;
         }
         
         /* 左上角热区 */
@@ -62,6 +67,41 @@
             left: 0;
             z-index: 10;
             cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .corner-hotspot:hover {
+            transform: scale(1.1);
+        }
+        
+        .corner-hotspot:hover::before {
+            content: "点击切换颜色 🎨";
+            position: absolute;
+            top: 85px;
+            left: 0;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 提示文字 */
+        .hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #999;
+            font-size: 14px;
+            z-index: 2;
         }
     </style>
 </head>
@@ -75,6 +115,8 @@
         <h1>欢迎来到小野的网站</h1>
         <p>我很高兴您来到这里！</p>
     </div>
+    
+    <div class="hint">💡 鼠标移动到左上角切换颜色 | 按空格键快速切换</div>
 
     <script>
         // 颜色配置（全浅色方案）
@@ -134,7 +176,17 @@
         updateColors(colorOrder[currentColorIndex]);
 
         // 为左上角热区添加鼠标进入事件
-        hotspot.addEventListener('mouseenter', function() {
+        hotspot.addEventListener('mouseenter', switchColor);
+        
+        // 添加键盘支持
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space' && !isAnimating) {
+                e.preventDefault(); // 防止页面滚动
+                switchColor();
+            }
+        });
+
+        function switchColor() {
             // 如果正在动画中，忽略此次触发
             if (isAnimating) return;
             
@@ -169,17 +221,19 @@
                     // 动画完成后解锁
                     setTimeout(() => {
                         isAnimating = false;
-                    }, 100); // 额外延迟确保完全结束
+                    }, 100);
                 }, 800);
             }, 50);
-        });
+        }
 
         function updateColors(colorName) {
             const scheme = colorSchemes[colorName];
-            body.style.backgroundColor = scheme.bg;
-            document.querySelector('h1').style.color = scheme.h1;
-            document.querySelectorAll('p').forEach(p => {
-                p.style.color = scheme.p;
+            requestAnimationFrame(() => {
+                body.style.backgroundColor = scheme.bg;
+                document.querySelector('h1').style.color = scheme.h1;
+                document.querySelectorAll('p').forEach(p => {
+                    p.style.color = scheme.p;
+                });
             });
         }
     </script>
