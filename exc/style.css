@@ -1,0 +1,182 @@
+/* style.css */
+/* 基于你的蓝色调色板 */
+:root {
+    --bg-primary: #e6f2ff;
+    --h1-color: #4a7bc8;
+    --p-color: #6b93c9;
+    --border-color: #c2d6f0;
+    --shadow-color: rgba(74, 123, 200, 0.1);
+    --accent-light: #a8c6f0;
+    --accent-dark: #3a6bb8;
+}
+
+/* 基础样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 标题样式 */
+h1 {
+    color: var(--h1-color);
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    text-align: center;
+}
+
+h2 {
+    color: var(--h1-color);
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 2rem 0 1rem 0;
+    opacity: 0.9;
+}
+
+h3 {
+    color: var(--h1-color);
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin: 1.5rem 0 0.8rem 0;
+    opacity: 0.8;
+}
+
+/* 按钮基础样式 */
+.btn {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--h1-color), #5a8bd8);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+    font-family: inherit;
+    margin: 0.3rem;
+}
+
+.btn:hover {
+    background: linear-gradient(135deg, #3a6bb8, #4a7bc8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-color);
+    color: white;
+    text-decoration: none;
+}
+
+/* 按钮变体 */
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--h1-color);
+    color: var(--h1-color);
+}
+
+.btn-outline:hover {
+    background: var(--h1-color);
+    color: white;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #4caf50, #66bb6a);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ff9800, #ffb74d);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #f44336, #ef5350);
+}
+
+/* 按钮尺寸 */
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+/* 网格布局 */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.card h3 {
+    margin-top: 0;
+}
+
+/* 功能区域 */
+.download-section, .navigation-section {
+    margin: 3rem 0;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .card {
+        padding: 1.5rem;
+    }
+    
+    .container {
+        padding: 0 10px;
+    }
+}
+
+/* 工具类 */
+.text-center { text-align: center; }
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.mb-1 { margin-bottom: 1rem; }
+.mb-2 { margin-bottom: 2rem; }
